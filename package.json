@@ -1,0 +1,38 @@
+{
+  "name": "xiaohongshu-collector",
+  "version": "1.0.0",
+  "description": "小红书笔记收集整理工具",
+  "main": "crawler/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node crawler/index.js",
+    "serve": "node server.js",
+    "collect": "node crawler/simple-collect.js",
+    "import": "node crawler/import.js",
+    "import:sample": "node crawler/import.js sample",
+    "manual": "node crawler/manual.js",
+    "doc": "node crawler/generate-doc.js",
+    "doc:full": "node crawler/generate-full-doc.js",
+    "extract": "node crawler/extract-content.js",
+    "extract:all": "node crawler/auto-extract-simple.js",
+    "extract:batch": "node crawler/smart-extract.js",
+    "extract:help": "node crawler/extract-helper.js",
+    "extract:merge": "node crawler/extract-helper.js --merge",
+    "extract:status": "node crawler/extract-helper.js --status",
+    "login": "node crawler/login-save-session.js",
+    "login:check": "node crawler/load-cookies.js",
+    "extract:login": "node crawler/extract-with-login.js",
+    "ocr:test": "node scripts/test-ocr.js",
+    "ocr:batch": "node scripts/batch-ocr.js",
+    "ocr:all": "node scripts/batch-ocr.js 0",
+    "dev": "node --watch crawler/index.js"
+  },
+  "keywords": ["xiaohongshu", "crawler", "notes"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.6.0",
+    "cheerio": "^1.0.0-rc.12",
+    "puppeteer": "^22.0.0"
+  }
+}
