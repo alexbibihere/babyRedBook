@@ -41,7 +41,8 @@
       "Bash(findstr:*)",
       "Bash(monitor-ocr:*)",
       "Bash(cmd:*)",
-      "Bash(ping:*)"
+      "Bash(ping:*)",
+      "Bash(if exist \"tools\\\\XHS-Downloader\\\\.git\" rmdir /s /q \"tools\\\\XHS-Downloader\\\\.git\")"
     ]
   }
 }
