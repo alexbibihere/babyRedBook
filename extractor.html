@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小红书笔记内容提取工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 32px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .status {
+            background: #f0f0f0;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .step {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .step h3 {
+            color: #495057;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+
+        .step ol {
+            margin-left: 20px;
+            color: #6c757d;
+            line-height: 1.8;
+        }
+
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            margin: 5px;
+        }
+
+        .btn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .result-area {
+            margin-top: 30px;
+        }
+
+        .result-item {
+            background: #fff;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+
+        .result-item h4 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .result-item pre {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-card .number {
+            font-size: 36px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-card .label {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #e9ecef;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            transition: width 0.3s;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 150px;
+            padding: 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-family: monospace;
+            font-size: 13px;
+            resize: vertical;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📝 小红书笔记内容提取工具</h1>
+        <p class="subtitle">简单3步,提取你小红书笔记的完整内容</p>
+
+        <div class="status info">
+            <strong>💡 提示:</strong> 本工具需要在小红书已登录状态下使用
+        </div>
+
+        <div class="step">
+            <h3>📋 第一步: 准备笔记链接</h3>
+            <ol>
+                <li>打开 <a href="https://www.xiaohongshu.com" target="_blank">小红书官网</a> 并确保已登录</li>
+                <li>访问你的笔记列表或直接打开任意一篇你的笔记</li>
+                <li>复制需要提取内容的笔记链接(URL)</li>
+            </ol>
+        </div>
+
+        <div class="step">
+            <h3>🔧 第二步: 打开开发者工具</h3>
+            <ol>
+                <li>在笔记页面按 <strong>F12</strong> 键(或右键点击→检查)</li>
+                <li>切换到 <strong>Console(控制台)</strong> 标签页</li>
+                <li>复制下面的脚本并粘贴到控制台</li>
+            </ol>
+            <div class="code-block">
+(async function() {
+    console.log('📝 开始提取笔记内容...\n');
+
+    setTimeout(() => {
+        const titleEl = document.querySelector('[class*="title"], h1, h2');
+        const title = titleEl ? titleEl.innerText.trim() : '未找到';
+
+        const contentSelectors = [
+            '[class*="note-text"]',
+            '[class*="desc-text"]',
+            '[class*="content-text"]',
+            'section[class*="note"] div[class*="text"]',
+            'article[class*="note"]',
+            'div[class*="rich-text"]'
+        ];
+
+        let content = '';
+        for (const selector of contentSelectors) {
+            const elements = document.querySelectorAll(selector);
+            if (elements.length > 0) {
+                const texts = Array.from(elements).map(el => el.innerText.trim())
+                    .filter(t => t && t.length > 20).join('\n\n');
+                if (texts.length > content.length) content = texts;
+            }
+        }
+
+        const imgElements = document.querySelectorAll('img');
+        const images = Array.from(imgElements).map(img => img.src)
+            .filter(src => src && src.includes('sns-webpic')).slice(0, 9);
+
+        console.log('标题:', title);
+        console.log('URL:', window.location.href);
+        console.log('\n内容:\n', content);
+        console.log('\n图片:', images);
+    }, 2000);
+})();
+            </div>
+        </div>
+
+        <div class="step">
+            <h3>📥 第三步: 复制提取结果</h3>
+            <ol>
+                <li>脚本会自动在控制台输出提取的内容</li>
+                <li>复制输出的内容,粘贴到下方文本框</li>
+                <li>点击"保存到本地"按钮下载</li>
+            </ol>
+        </div>
+
+        <div class="result-area">
+            <h3>📝 粘贴提取的内容:</h3>
+            <textarea id="extractedContent" placeholder="将控制台输出的内容粘贴到这里..."></textarea>
+            <div style="margin-top: 15px;">
+                <button class="btn" onclick="saveContent()">💾 保存到本地</button>
+                <button class="btn btn-secondary" onclick="clearContent()">🗑️ 清空</button>
+            </div>
+        </div>
+
+        <div class="result-area">
+            <h3>📊 批量提取统计</h3>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressBar" style="width: 0%">0%</div>
+            </div>
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="number" id="totalCount">0</div>
+                    <div class="label">已提取笔记数</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number" id="totalLength">0</div>
+                    <div class="label">总字符数</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let extractedNotes = [];
+
+        function saveContent() {
+            const content = document.getElementById('extractedContent').value.trim();
+
+            if (!content) {
+                alert('请先粘贴提取的内容!');
+                return;
+            }
+
+            // 创建下载
+            const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = '小红书笔记内容_' + new Date().toISOString().slice(0,10) + '.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            // 更新统计
+            extractedNotes.push(content);
+            updateStats();
+
+            alert('✅ 保存成功!');
+        }
+
+        function clearContent() {
+            document.getElementById('extractedContent').value = '';
+        }
+
+        function updateStats() {
+            const total = extractedNotes.length;
+            const totalLength = extractedNotes.reduce((sum, note) => sum + note.length, 0);
+
+            document.getElementById('totalCount').textContent = total;
+            document.getElementById('totalLength').textContent = totalLength;
+
+            const progress = Math.min((total / 77) * 100, 100);
+            document.getElementById('progressBar').style.width = progress + '%';
+            document.getElementById('progressBar').textContent = Math.round(progress) + '%';
+        }
+
+        // 页面加载时显示提示
+        window.addEventListener('load', () => {
+            console.log('📝 小红书笔记提取工具已加载');
+            console.log('📋 使用说明: 查看 extractor.html 页面');
+        });
+    </script>
+</body>
+</html>

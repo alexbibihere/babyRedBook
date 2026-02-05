@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的小红书笔记集</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>📕 我的小红书笔记集</h1>
+            <p class="subtitle">记录生活，分享美好</p>
+        </header>
+
+        <nav class="tabs">
+            <button class="tab-btn active" data-tab="notes">
+                <span class="icon">📝</span>
+                <span class="text">我的笔记</span>
+                <span class="count" id="notes-count">0</span>
+            </button>
+            <button class="tab-btn" data-tab="collections">
+                <span class="icon">⭐</span>
+                <span class="text">我的收藏</span>
+                <span class="count" id="collections-count">0</span>
+            </button>
+            <button class="tab-btn" data-tab="likes">
+                <span class="icon">❤️</span>
+                <span class="text">我的点赞</span>
+                <span class="count" id="likes-count">0</span>
+            </button>
+        </nav>
+
+        <div class="search-box">
+            <input type="text" id="search-input" placeholder="搜索笔记标题或内容...">
+            <select id="sort-select">
+                <option value="newest">最新优先</option>
+                <option value="oldest">最早优先</option>
+                <option value="popular">最受欢迎</option>
+            </select>
+        </div>
+
+        <main class="content">
+            <div class="tab-content active" id="notes">
+                <div class="notes-grid" id="notes-grid"></div>
+            </div>
+
+            <div class="tab-content" id="collections">
+                <div class="notes-grid" id="collections-grid"></div>
+            </div>
+
+            <div class="tab-content" id="likes">
+                <div class="notes-grid" id="likes-grid"></div>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>共收录 <strong id="total-count">0</strong> 篇笔记</p>
+        </footer>
+    </div>
+
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div id="modal-body"></div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

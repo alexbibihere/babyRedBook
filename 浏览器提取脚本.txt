@@ -1,0 +1,136 @@
+// ========== 小红书笔记完整内容提取脚本 ==========
+//
+// 使用方法:
+// 1. 在浏览器中访问 https://www.xiaohongshu.com (确保已登录)
+// 2. 点击进入任意一篇你的笔记
+// 3. 按F12打开控制台
+// 4. 复制下面的脚本并运行
+// 5. 脚本会自动提取当前笔记的完整内容并显示
+// =================================================
+
+(function() {
+    console.log('\n📝 开始提取笔记内容...\n');
+
+    // 等待页面加载完成
+    setTimeout(() => {
+        try {
+            // 获取笔记标题
+            const titleEl = document.querySelector('[class*="title"], h1, h2');
+            const title = titleEl ? titleEl.innerText.trim() : '未找到标题';
+
+            // 尝试多种选择器提取正文
+            const contentSelectors = [
+                '[class*="note-text"]',
+                '[class*="desc-text"]',
+                '[class*="content-text"]',
+                'section[class*="note"] div[class*="text"]',
+                'article[class*="note"]',
+                'div[class*="rich-text"]',
+                'div[class*="note-content"]',
+                '[class*="note"] span[class*="text"]',
+                '.post-content',
+                '[class*="main-content"]'
+            ];
+
+            let content = '';
+            for (const selector of contentSelectors) {
+                const elements = document.querySelectorAll(selector);
+                if (elements.length > 0) {
+                    const texts = Array.from(elements)
+                        .map(el => {
+                            const cloned = el.cloneNode(true);
+                            cloned.querySelectorAll('script, style, nav, footer').forEach(s => s.remove());
+                            return cloned.innerText.trim();
+                        })
+                        .filter(text => text && text.length > 20)
+                        .join('\n\n');
+
+                    if (texts.length > content.length) {
+                        content = texts;
+                    }
+                }
+            }
+
+            // 如果还是没找到,使用备用方法
+            if (!content || content.length < 50) {
+                const allText = document.body.innerText;
+                const lines = allText.split('\n')
+                    .map(line => line.trim())
+                    .filter(line => {
+                        // 过滤掉导航、页脚等无关内容
+                        return line.length > 10 &&
+                               !line.includes('点赞') &&
+                               !line.includes('收藏') &&
+                               !line.includes('评论') &&
+                               !line.includes('分享') &&
+                               !line.includes('ICP') &&
+                               !line.includes('营业执照') &&
+                               !line.includes('隐私政策') &&
+                               !line.includes('用户协议') &&
+                               !line.includes('沪公网安备') &&
+                               !line.includes('增值电信') &&
+                               !line.includes('违法不良') &&
+                               !line.includes('互联网举报') &&
+                               !line.includes('广告屏蔽');
+                    })
+                    .join('\n\n');
+
+                content = lines;
+            }
+
+            // 提取图片
+            const imgElements = document.querySelectorAll('img');
+            const images = Array.from(imgElements)
+                .map(img => img.src || img.getAttribute('data-src'))
+                .filter(src => src && (src.includes('sns-webpic') || src.includes('xhscdn')))
+                .slice(0, 9);
+
+            // 获取当前URL
+            const url = window.location.href;
+
+            // 输出结果
+            console.log('═══════════════════════════════════');
+            console.log('✅ 提取完成!');
+            console.log('═══════════════════════════════════\n');
+            console.log('📋 标题:', title);
+            console.log('🔗 URL:', url);
+            console.log('📝 内容长度:', content.length, '字符');
+            console.log('🖼️ 图片数:', images.length);
+            console.log('\n─────────────────────────────────────');
+            console.log('📄 完整内容:');
+            console.log('─────────────────────────────────────\n');
+            console.log(content);
+            console.log('\n─────────────────────────────────────');
+            console.log('🖼️ 图片链接:');
+            console.log('─────────────────────────────────────\n');
+            images.forEach((img, i) => {
+                console.log(`${i + 1}. ${img}`);
+            });
+            console.log('\n═══════════════════════════════════\n');
+
+            // 生成JSON格式的数据
+            const jsonData = {
+                url: url,
+                title: title,
+                content: content,
+                images: images,
+                extractedAt: new Date().toISOString()
+            };
+
+            console.log('📋 JSON格式数据 (可直接复制使用):');
+            console.log('─────────────────────────────────────\n');
+            console.log(JSON.stringify(jsonData, null, 2));
+
+            // 返回数据供进一步使用
+            return jsonData;
+
+        } catch (error) {
+            console.error('❌ 提取失败:', error.message);
+            console.error('\n可能的原因:');
+            console.error('1. 页面尚未加载完成,请稍后再试');
+            console.error('2. 当前页面不是笔记详情页');
+            console.error('3. 页面结构发生了变化\n');
+        }
+    }, 2000); // 等待2秒确保页面加载完成
+
+})();

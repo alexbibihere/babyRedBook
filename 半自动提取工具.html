@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小红书笔记半自动提取工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .step {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .step h3 {
+            color: #495057;
+            margin-bottom: 10px;
+        }
+
+        .step ol {
+            margin-left: 20px;
+            line-height: 1.8;
+            color: #6c757d;
+        }
+
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: monospace;
+            font-size: 12px;
+            line-height: 1.6;
+            margin: 10px 0;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 5px;
+        }
+
+        .btn:hover {
+            background: #5568d3;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-card .number {
+            font-size: 32px;
+            font-weight: bold;
+        }
+
+        .note-list {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            background: #f8f9fa;
+        }
+
+        .note-item {
+            padding: 10px;
+            border-bottom: 1px solid #dee2e6;
+            cursor: pointer;
+        }
+
+        .note-item:hover {
+            background: #e9ecef;
+        }
+
+        .note-item:last-child {
+            border-bottom: none;
+        }
+
+        .note-item .title {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .note-item .url {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .note-item.done {
+            background: #d4edda;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 200px;
+            padding: 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-family: monospace;
+            font-size: 13px;
+            resize: vertical;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📝 小红书笔记半自动提取工具</h1>
+        <p class="subtitle">简单3步,提取所有笔记完整内容</p>
+
+        <div class="step">
+            <h3>📋 第一步:准备笔记列表</h3>
+            <p style="color: #666; margin: 10px 0;">点击下方按钮生成笔记列表:</p>
+            <button class="btn" onclick="generateNoteList()">📋 生成笔记列表</button>
+        </div>
+
+        <div class="step">
+            <h3>🔧 第二步:在小红书网页中运行脚本</h3>
+            <ol>
+                <li>在你已登录的浏览器中访问 <a href="https://www.xiaohongshu.com" target="_blank">小红书</a></li>
+                <li>点击进入任意一篇你的笔记</li>
+                <li>按 F12 打开控制台</li>
+                <li>复制下面的脚本并粘贴到控制台</li>
+            </ol>
+            <div class="code-block" id="scriptCode">
+// 点击"生成提取脚本"按钮生成脚本
+            </div>
+            <button class="btn" onclick="generateScript()">📝 生成提取脚本</button>
+            <button class="btn" onclick="copyScript()">📋 复制脚本</button>
+        </div>
+
+        <div class="step">
+            <h3>🔄 第三步:批量提取</h3>
+            <ol>
+                <li>在控制台运行脚本后,会显示第一篇笔记的URL</li>
+                <li>访问该URL,然后在控制台输入 <code>extract()</code></li>
+                <li>等待提取完成</li>
+                <li>脚本会显示下一篇笔记的URL,重复步骤2-3</li>
+                <li>提取完所有笔记后,输入 <code>showJSON()</code> 查看结果</li>
+            </ol>
+        </div>
+
+        <div class="step">
+            <h3>💾 第四步:保存数据</h3>
+            <p style="color: #666; margin: 10px 0;">将提取的JSON数据粘贴到下方:</p>
+            <textarea id="extractedData" placeholder="粘贴从控制台复制的JSON数据..."></textarea>
+            <div style="margin-top: 15px;">
+                <button class="btn" onclick="saveData()">💾 保存到本地</button>
+                <button class="btn" onclick="mergeData()">🔗 合并到notes.json</button>
+            </div>
+        </div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="number" id="totalNotes">77</div>
+                <div>总笔记数</div>
+            </div>
+            <div class="stat-card">
+                <div class="number" id="extractedNotes">0</div>
+                <div>已提取</div>
+            </div>
+        </div>
+
+        <div class="step">
+            <h3>📚 笔记列表预览</h3>
+            <div class="note-list" id="noteList">
+                <p style="color: #999; text-align: center; padding: 20px;">点击"生成笔记列表"查看</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 从项目读取笔记数据
+        async function loadNotes() {
+            try {
+                const response = await fetch('data/notes.json');
+                const notes = await response.json();
+                return notes;
+            } catch (error) {
+                console.error('加载笔记数据失败:', error);
+                return [];
+            }
+        }
+
+        // 生成笔记列表
+        async function generateNoteList() {
+            const notes = await loadNotes();
+            const noteListEl = document.getElementById('noteList');
+
+            noteListEl.innerHTML = notes.map((note, index) => `
+                <div class="note-item">
+                    <div class="title">${index + 1}. ${note.title || '无标题'}</div>
+                    <div class="url">${note.url}</div>
+                </div>
+            `).join('');
+
+            document.getElementById('totalNotes').textContent = notes.length;
+        }
+
+        // 生成提取脚本
+        async function generateScript() {
+            const notes = await loadNotes();
+            const notesList = notes.map(n => ({ url: n.url, title: n.title }));
+
+            const script = `(async function() {
+    const notesList = ${JSON.stringify(notesList, null, 2)};
+
+    let extractedNotes = [];
+    let currentIndex = 0;
+
+    function extractCurrentPage() {
+        console.clear();
+        console.log('📝 正在提取当前页面...\\n');
+
+        const titleEl = document.querySelector('[class*="title"], h1, h2');
+        const title = titleEl ? titleEl.innerText.trim() : document.title.split('-')[0].trim();
+
+        let content = '';
+        const selectors = [
+            '[class*="note-text"]',
+            '[class*="desc-text"]',
+            '[class*="content-text"]',
+            'section[class*="note"] div[class*="text"]',
+            'article[class*="note"]',
+            'div[class*="rich-text"]'
+        ];
+
+        for (const selector of selectors) {
+            const elements = document.querySelectorAll(selector);
+            if (elements.length > 0) {
+                const texts = Array.from(elements)
+                    .map(el => {
+                        const cloned = el.cloneNode(true);
+                        cloned.querySelectorAll('script, style, nav, footer, header').forEach(s => s.remove());
+                        return cloned.innerText.trim();
+                    })
+                    .filter(text => text && text.length > 20)
+                    .join('\\n\\n');
+
+                if (texts.length > content.length) {
+                    content = texts;
+                }
+            }
+        }
+
+        const result = {
+            url: window.location.href,
+            title: title,
+            content: content,
+            extractedAt: new Date().toISOString()
+        };
+
+        extractedNotes.push(result);
+
+        console.log('✅ 提取完成!');
+        console.log('📊 进度: ' + extractedNotes.length + '/' + notesList.length);
+        console.log('📝 标题: ' + title);
+        console.log('📏 长度: ' + content.length + ' 字符\\n');
+
+        if (content.length > 0) {
+            console.log('内容预览:\\n' + content.substring(0, 200) + '...\\n');
+        }
+
+        return result;
+    }
+
+    function showPrompt() {
+        console.clear();
+        console.log('\\n═══════════════════════════════════════');
+        console.log('📝 小红书笔记提取工具');
+        console.log('═══════════════════════════════════════\\n');
+        console.log('📊 进度: ' + extractedNotes.length + '/' + notesList.length + '\\n');
+
+        if (currentIndex < notesList.length) {
+            const note = notesList[currentIndex];
+            console.log('─────────────────────────────────────');
+            console.log('📋 下一步:');
+            console.log('─────────────────────────────────────\\n');
+            console.log('1. 访问: ' + note.url);
+            console.log('2. 页面加载后,在控制台输入: extract()\\n');
+            console.log('═══════════════════════════════════════\\n');
+        } else {
+            console.log('🎉 全部完成!\\n');
+            console.log('输入 showJSON() 查看结果\\n');
+        }
+    }
+
+    window.extract = function() {
+        extractCurrentPage();
+        currentIndex++;
+        showPrompt();
+    };
+
+    window.showJSON = function() {
+        console.log('\\n📋 提取的数据:\\n');
+        console.log(JSON.stringify(extractedNotes, null, 2));
+    };
+
+    console.log('✅ 提取工具已加载!\\n');
+    console.log('命令: extract() - 提取当前页面');
+    console.log('      showJSON() - 显示数据\\n');
+
+    showPrompt();
+})();`;
+
+            document.getElementById('scriptCode').textContent = script;
+        }
+
+        // 复制脚本
+        function copyScript() {
+            const script = document.getElementById('scriptCode').textContent;
+            navigator.clipboard.writeText(script).then(() => {
+                alert('✅ 脚本已复制到剪贴板!');
+            });
+        }
+
+        // 保存数据
+        function saveData() {
+            const data = document.getElementById('extractedData').value;
+            if (!data.trim()) {
+                alert('请先粘贴提取的数据!');
+                return;
+            }
+
+            const blob = new Blob([data], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'extracted-notes-' + new Date().toISOString().slice(0,10) + '.json';
+            a.click();
+            URL.revokeObjectURL(url);
+
+            alert('✅ 数据已保存!');
+        }
+
+        // 合并数据
+        async function mergeData() {
+            const data = document.getElementById('extractedData').value;
+            if (!data.trim()) {
+                alert('请先粘贴提取的数据!');
+                return;
+            }
+
+            // 这里需要后端支持,暂时只提示
+            alert('💡 请运行以下命令合并数据:\n\nnpm run extract:merge\n\n或将数据保存到 data/extracted-batch-0.json');
+        }
+
+        // 页面加载时生成笔记列表
+        window.addEventListener('load', () => {
+            generateNoteList();
+        });
+    </script>
+</body>
+</html>
